@@ -1,0 +1,61 @@
+from typing import Annotated
+from fastapi import FastAPI, File, UploadFile, Form
+from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
+import uvicorn
+import random
+from pathlib import Path
+import uuid
+import shutil
+import tasks
+from celery.result import AsyncResult
+import config
+
+if not config.DEBUG:
+    if config.UPLOAD_DIR.exists():
+        shutil.rmtree(config.UPLOAD_DIR)
+    config.UPLOAD_DIR.mkdir(exist_ok=True)
+
+app = FastAPI(title="Vandalizer")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
+
+
+@app.get("/")
+def health_check():
+    return {"status": "running"}
+
+
+@app.get("/job_status/{job_id}")
+def get_job_status(job_id: str):
+    result = AsyncResult(job_id, app=tasks.celery_app)
+    return {
+        "job_id": job_id,
+        "status": result.status,
+    }
+
+
+# putting default signature as Form(...) or File(...) makes it a form data, otherwise it would be a query data
+@app.post("/process/dino")
+async def process_dino(prompt: str = Form(...), file: UploadFile = File(...)):
+    job_id = uuid.uuid4()  # uuid1 exposes mac address and time, uuid3,5 uses a key value to generate a hash, same input gets same out, uuid4 is random
+    job_folder = config.UPLOAD_DIR / str(job_id)
+    job_folder.mkdir()
+
+    save_path = job_folder / config.INPUT_IMG_NAME
+    with open(save_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+
+    # tasks.process_dino.apply_async(args=[job_id], task_id=str(job_id))
+    tasks.process_dino(prompt="", job_id=str(job_id))
+    return job_id
+
+
+if __name__ == "__main__":
+    uvicorn.run("main:app", host="127.0.0.1", port=8080, reload=True, reload_delay=1)

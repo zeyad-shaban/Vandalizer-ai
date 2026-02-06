@@ -1,4 +1,6 @@
 *.pt
 *.bin
 *.xml
+*.onnx
+*.xml
 *.safetensors
