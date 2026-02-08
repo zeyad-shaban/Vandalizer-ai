@@ -10,12 +10,13 @@ import shutil
 import tasks
 from celery.result import AsyncResult
 import config
+from pydantic import BaseModel
 
 if not config.DEBUG:
     if config.UPLOAD_DIR.exists():
         shutil.rmtree(config.UPLOAD_DIR)
     config.UPLOAD_DIR.mkdir(exist_ok=True)
-
+    
 app = FastAPI(title="Vandalizer")
 app.add_middleware(
     CORSMiddleware,
@@ -42,18 +43,27 @@ def get_job_status(job_id: str):
 
 
 # putting default signature as Form(...) or File(...) makes it a form data, otherwise it would be a query data
-@app.post("/process/dino")
-async def process_dino(prompt: str = Form(...), file: UploadFile = File(...)):
-    job_id = uuid.uuid4()  # uuid1 exposes mac address and time, uuid3,5 uses a key value to generate a hash, same input gets same out, uuid4 is random
-    job_folder = config.UPLOAD_DIR / str(job_id)
+@app.post("/process/detect_objects")
+async def detect_objects(prompt: str = Form(...), file: UploadFile = File(...)):
+    job_id = str(uuid.uuid4())  # uuid1 exposes mac address and time, uuid3,5 uses a key value to generate a hash, same input gets same out, uuid4 is random
+    job_folder = config.UPLOAD_DIR / job_id
     job_folder.mkdir()
 
     save_path = job_folder / config.INPUT_IMG_NAME
     with open(save_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
 
-    # tasks.process_dino.apply_async(args=[job_id], task_id=str(job_id))
-    tasks.process_dino(prompt="", job_id=str(job_id))
+    tasks.detect_objets.apply_async(args=[prompt, job_id], task_id=job_id)
+    return job_id
+
+
+# is this a good place to define those?
+class SegmentRequest(BaseModel):
+    bboxes: list[list[float]]
+
+@app.post("/process/segment_objects/{job_id}")
+async def segment_objects(job_id: str, data: SegmentRequest):
+    tasks.segment_objects.apply_async(args=[job_id, data.bboxes], task_id=job_id)
     return job_id
 
 

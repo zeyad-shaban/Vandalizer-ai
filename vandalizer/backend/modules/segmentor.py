@@ -69,8 +69,8 @@ if __name__ == "__main__":
 
             plt.subplot(121)
             plt.imshow(collected_masks)
-            
+
             plt.subplot(122)
             plt.imshow(masked_img)
-            
+
             plt.show()
