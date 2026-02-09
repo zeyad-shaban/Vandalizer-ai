@@ -4,7 +4,7 @@
     {
       "label": "start:backend-watch",
       "type": "shell",
-      "command": "conda run --no-capture-output -n multimodal watchfiles --filter python --target-type command 'python -m celery -A tasks worker --loglevel=info' .",
+      "command": "conda run --no-capture-output -n multimodal watchfiles --filter python --target-type command 'python -m celery -A tasks worker -P solo --loglevel=info' .",
       "isBackground": true,
       "problemMatcher": {
         "pattern": { "regexp": "." },
