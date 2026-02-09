@@ -33,6 +33,19 @@ def health_check():
     return {"status": "running"}
 
 
+@app.get("/upload")
+def upload(img: UploadFile= File(...)):
+    job_id = str(uuid.uuid4())  # uuid1 exposes mac address and time, uuid3,5 uses a key value to generate a hash, same input gets same out, uuid4 is random
+    job_folder = config.UPLOAD_DIR / job_id
+    job_folder.mkdir()
+
+    save_path = job_folder / config.INPUT_IMG_NAME
+    with open(save_path, "wb") as buffer:
+        shutil.copyfileobj(img.file, buffer)
+        
+    return job_id
+
+
 @app.get("/job_status/{job_id}")
 def get_job_status(job_id: str):
     result = AsyncResult(job_id, app=tasks.celery_app)
@@ -43,16 +56,8 @@ def get_job_status(job_id: str):
 
 
 # putting default signature as Form(...) or File(...) makes it a form data, otherwise it would be a query data
-@app.post("/process/detect_objects")
-async def detect_objects(prompt: str = Form(...), file: UploadFile = File(...)):
-    job_id = str(uuid.uuid4())  # uuid1 exposes mac address and time, uuid3,5 uses a key value to generate a hash, same input gets same out, uuid4 is random
-    job_folder = config.UPLOAD_DIR / job_id
-    job_folder.mkdir()
-
-    save_path = job_folder / config.INPUT_IMG_NAME
-    with open(save_path, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
-
+@app.post("/process/detect_objects/{job_id}")
+async def detect_objects(job_id: str, prompt: str = Form(...), file: UploadFile = File(...)):
     tasks.detect_objets.apply_async(args=[prompt, job_id], task_id=job_id)
     return job_id
 

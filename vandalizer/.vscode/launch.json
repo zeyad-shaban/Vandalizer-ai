@@ -1,0 +1,29 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug Backend (main.py)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/backend/main.py",
+      "cwd": "${workspaceFolder}/backend", // <--- THIS FIXES YOUR PATH ISSUE
+      "console": "integratedTerminal",
+      "preLaunchTask": "start:backend-watch"
+    },
+    {
+      "name": "Debug Brave + Vite",
+      "type": "chrome",
+      "request": "launch",
+      "preLaunchTask": "start:vite",
+      "url": "http://localhost:5173",
+      "webRoot": "${workspaceFolder}/frontend",
+      "runtimeExecutable": "C:\\Program Files\\BraveSoftware\\Brave-Browser\\Application\\brave.exe"
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Debug Full Stack",
+      "configurations": ["Debug Backend (main.py)", "Debug Brave + Vite"]
+    }
+  ]
+}

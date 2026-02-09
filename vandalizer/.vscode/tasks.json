@@ -1,0 +1,41 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "start:backend-watch",
+      "type": "shell",
+      "command": "conda run --no-capture-output -n multimodal watchfiles --filter python --target-type command 'python -m celery -A tasks worker --loglevel=info' .",
+      "isBackground": true,
+      "problemMatcher": {
+        "pattern": { "regexp": "." },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "^.*",
+          "endsPattern": "^.*"
+        }
+      },
+      "presentation": { "panel": "dedicated", "reveal": "always" },
+      "options": { 
+        "cwd": "${workspaceFolder}/backend" 
+      }
+    },
+    {
+      "label": "start:vite",
+      "type": "shell",
+      "command": "npm run dev",
+      "isBackground": true,
+      "problemMatcher": {
+        "pattern": { "regexp": "." },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "VITE v.* ready in",
+          "endsPattern": ".*"
+        }
+      },
+      "presentation": { "panel": "dedicated", "reveal": "always" },
+      "options": { 
+        "cwd": "${workspaceFolder}/frontend" 
+      }
+    }
+  ]
+}
