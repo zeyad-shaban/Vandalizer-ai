@@ -33,7 +33,7 @@ def health_check():
     return {"status": "running"}
 
 
-@app.get("/upload")
+@app.post("/upload")
 def upload(img: UploadFile= File(...)):
     job_id = str(uuid.uuid4())  # uuid1 exposes mac address and time, uuid3,5 uses a key value to generate a hash, same input gets same out, uuid4 is random
     job_folder = config.UPLOAD_DIR / job_id
