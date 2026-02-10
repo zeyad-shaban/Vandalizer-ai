@@ -20,3 +20,5 @@ export const getBBoxes = (jobID) => {
     const endpoint = `/uploads/${jobID}/detector_boxes.json`;
     return apiClient.get(endpoint);
 }
+
+export const getInputImgUrl = (jobID) => `${import.meta.env.VITE_API_BASE_URL}/uploads/${jobID}/${import.meta.env.VITE_INPUT_IMG_PATH}`

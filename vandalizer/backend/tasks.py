@@ -24,7 +24,7 @@ MODELS: dict[str, Any] = {
 def get_detector_model():
     if MODELS["detector"] is None:
         core = ov.Core()
-        model = core.read_model(config.DETECTOR_PATH)
+        model = core.read_model(config.DETECTOR_MODEL_PATH)
 
         MODELS["detector"] = core.compile_model(model, "CPU")
 
@@ -33,7 +33,7 @@ def get_detector_model():
 
 def get_detector_processor():
     if MODELS["detector_processor"] is None:
-        MODELS["detector_processor"] = AutoProcessor.from_pretrained(config.DETECTOR_MODEL_NAME, use_fast=True)
+        MODELS["detector_processor"] = AutoProcessor.from_pretrained(config.DETECTOR_MODEL_PATH, use_fast=True)
     return MODELS["detector_processor"]
 
 
@@ -53,10 +53,11 @@ celery_app = Celery(
 
 
 @celery_app.task
-def detect_objets(prompt: str, job_id: str) -> dict:
+def detect_objects(prompt: str, job_id: str) -> dict:
     prompt_list = get_prompt_list(prompt)
 
     job_path = config.UPLOAD_DIR / job_id
+    (job_path / config.DETECTOR_OUT_PATH).unlink()
     img = Image.open(job_path / config.INPUT_IMG_NAME)  # W x H
 
     model = get_detector_model()
@@ -113,7 +114,7 @@ if __name__ == "__main__":
     prompt = "hat"
     img = Image.open(config.UPLOAD_DIR / config.DEBUG_JOB_ID / config.INPUT_IMG_NAME)
 
-    detection_res = detect_objets(prompt=prompt, job_id=config.DEBUG_JOB_ID)
+    detection_res = detect_objects(prompt=prompt, job_id=config.DEBUG_JOB_ID)
     plot_groundingdino_boxes(img, detection_res)
 
     segment_res = segment_objects.run(job_id=config.DEBUG_JOB_ID, bboxes=detection_res["boxes"])

@@ -15,7 +15,7 @@
       "type": "chrome",
       "request": "launch",
       "preLaunchTask": "start:vite",
-      "url": "http://localhost:5173",
+      "url": "http://localhost:5341",
       "webRoot": "${workspaceFolder}/frontend",
       "runtimeExecutable": "C:\\Program Files\\BraveSoftware\\Brave-Browser\\Application\\brave.exe"
     }

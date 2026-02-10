@@ -23,7 +23,6 @@ function App() {
   if (loading)
     return <Loading />
 
-
   const renderContent = () => {
     if (appState == AppStates.IDLE) {
       return <ImageForm {...{ loading, setLoading, setErr, setJobID }}
