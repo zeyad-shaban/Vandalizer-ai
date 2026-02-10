@@ -1,5 +1,4 @@
 export const ErrorMessage = ({ err }) => {
-    console.log(`the error was ${err}`)
     if (err == null || err == "") return null
 
     return (

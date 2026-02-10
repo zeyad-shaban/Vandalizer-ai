@@ -1,6 +1,6 @@
 import { uploadImage } from "../services/api";
 
-export const ImageForm = ({ loading, setLoading, setErr, handleUploadSuccess: onSuccess }) => {
+export const ImageForm = ({ loading, setLoading, setErr, onSuccess }) => {
     const handleFileChange = async e => {
         if (loading)
             return;

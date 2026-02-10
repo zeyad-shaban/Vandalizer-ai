@@ -1,8 +1,10 @@
-import { useEffect, useState } from "react"
+import { useState } from "react"
 
+import { Loading } from "./components/Loading"
 import { Header } from "./components/Header"
 import { ImageForm } from "./components/ImageForm"
 import { ErrorMessage } from "./components/ErrorMessage"
+import { ImageDisplay } from "./components/ImageDisplay";
 
 
 const AppStates = Object.freeze({
@@ -18,20 +20,17 @@ function App() {
 
   const [jobID, setJobID] = useState(null);
 
-  useEffect(() => {
-    console.log(jobID)
-  }, [jobID]);
-
   if (loading)
-    return <h1>Loading... we need to turn this into a component?</h1>
+    return <Loading />
 
 
   const renderContent = () => {
     if (appState == AppStates.IDLE) {
       return <ImageForm {...{ loading, setLoading, setErr, setJobID }}
         onSuccess={res => { setJobID(res.data); setAppState(AppStates.WAITING_DETECT_PROMPT); }
-        }
-      />
+        } />
+    } else if (appState == AppStates.WAITING_DETECT_PROMPT) {
+      return <ImageDisplay {...{ jobID, setErr }} />
     }
   }
 

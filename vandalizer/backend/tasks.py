@@ -12,7 +12,7 @@ import numpy as np
 import json
 from typing import Any
 
-# model loading (is here a good place?)
+# todo is here a good place for model loading
 MODELS: dict[str, Any] = {
     "detector": None,
     "detector_processor": None,
