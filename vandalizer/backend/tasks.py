@@ -82,7 +82,8 @@ def detect_objets(prompt: str, job_id: str) -> dict:
     result = results[0]
     result["scores"] = result["scores"].tolist()
     result["labels"] = result["labels"].tolist()
-    result["boxes"] = result["boxes"].tolist()
+    result["boxes"] = result["boxes"].int().tolist()
+    result["text_labels"] = [prompt_list[label] for label in result["labels"]]
 
     with open(job_path / config.DETECTOR_OUT_PATH, "w") as f:
         json.dump(result, f, indent=2)

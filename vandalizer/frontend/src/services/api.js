@@ -9,9 +9,14 @@ export const uploadImage = (file) => {
 }
 
 export const sendDetectorPrompt = (jobID, prompt) => {
-    const endpoint = `/process/detect_objects/${jobID}`
-    const data = new FormData()
+    const endpoint = `/process/detect_objects/${jobID}`;
+    const data = new FormData();
     data.append('prompt', prompt);
 
     return apiClient.post(endpoint, data);
+}
+
+export const getBBoxes = (jobID) => {
+    const endpoint = `/uploads/${jobID}/detector_boxes.json`;
+    return apiClient.get(endpoint);
 }
