@@ -1,16 +1,15 @@
-from typing import Annotated
 from fastapi import FastAPI, File, UploadFile, Form
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
-import random
-from pathlib import Path
 import uuid
 import shutil
 import tasks
 from celery.result import AsyncResult
 import config
-from pydantic import BaseModel
+from schemas import SegmentRequest
+
+
 
 if not config.DEBUG:
     if config.UPLOAD_DIR.exists():
@@ -62,9 +61,6 @@ async def detect_objects(job_id: str, prompt: str = Form(...)):
     return job_id
 
 
-# todo is this a good place to define those?
-class SegmentRequest(BaseModel):
-    bboxes: list[list[float]]
 
 @app.post("/process/segment_objects/{job_id}")
 async def segment_objects(job_id: str, data: SegmentRequest):

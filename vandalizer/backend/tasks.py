@@ -5,45 +5,18 @@ from utils import get_prompt_list, plot_groundingdino_boxes
 
 from PIL import Image
 
-from transformers import AutoProcessor, BatchFeature
-import openvino as ov
-from ultralytics import SAM
+from transformers import BatchFeature
 import numpy as np
 import json
 from typing import Any
+from services import model_manager
 
-# todo is here a good place for model loading
 MODELS: dict[str, Any] = {
     "detector": None,
     "detector_processor": None,
     "segmentor": None,
     "inpainter": None,
 }
-
-
-def get_detector_model():
-    if MODELS["detector"] is None:
-        core = ov.Core()
-        model = core.read_model(config.DETECTOR_MODEL_PATH)
-
-        MODELS["detector"] = core.compile_model(model, "CPU")
-
-    return MODELS["detector"]
-
-
-def get_detector_processor():
-    if MODELS["detector_processor"] is None:
-        MODELS["detector_processor"] = AutoProcessor.from_pretrained(config.DETECTOR_MODEL_PATH, use_fast=True)
-    return MODELS["detector_processor"]
-
-
-def get_segmentor_model():
-    if MODELS["segmentor"] is None:
-        MODELS["segmentor"] = SAM(config.SEGMENTOR_MODEL_NAME)
-    return MODELS["segmentor"]
-
-
-# end model loading
 
 celery_app = Celery(
     "worker",
@@ -60,8 +33,8 @@ def detect_objects(prompt: str, job_id: str) -> dict:
     (job_path / config.DETECTOR_OUT_PATH).unlink()
     img = Image.open(job_path / config.INPUT_IMG_NAME)  # W x H
 
-    model = get_detector_model()
-    processor = get_detector_processor()
+    model = model_manager.get_detector_model(MODELS)
+    processor = model_manager.get_detector_processor(MODELS)
 
     inputs = processor(images=img, text=[prompt_list], return_tensors="pt")
     inputs = {name: t for name, t in inputs.items()}
@@ -97,7 +70,7 @@ def segment_objects(self, job_id: str, bboxes=None, points=None, point_labels=No
     job_path = config.UPLOAD_DIR / job_id
     img = Image.open(job_path / config.INPUT_IMG_NAME)
 
-    model = get_segmentor_model()
+    model = model_manager.get_segmentor_model(MODELS)
     results = model(img, bboxes=bboxes, points=points, labels=point_labels)
 
     np.save(job_path / config.SEGMENTOR_OUT_PATH, results[0].masks.data)  # type: ignore
