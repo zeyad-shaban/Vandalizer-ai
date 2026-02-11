@@ -16,9 +16,13 @@ export const sendDetectorPrompt = (jobID, prompt) => {
     return apiClient.post(endpoint, data);
 }
 
-export const getBBoxes = (jobID) => {
-    const endpoint = `/uploads/${jobID}/detector_boxes.json`;
-    return apiClient.get(endpoint);
-}
+export const checkJobStatus = (jobID) =>
+    apiClient.get(`/job_status/${jobID}`)
 
-export const getInputImgUrl = (jobID) => `${import.meta.env.VITE_API_BASE_URL}/uploads/${jobID}/${import.meta.env.VITE_INPUT_IMG_PATH}`
+
+export const getBBoxes = (jobID) =>
+    apiClient.get(`/uploads/${jobID}/detector_boxes.json`);
+
+
+export const getInputImgUrl = (jobID) =>
+    `${import.meta.env.VITE_API_BASE_URL}/uploads/${jobID}/${import.meta.env.VITE_INPUT_IMG_PATH}`

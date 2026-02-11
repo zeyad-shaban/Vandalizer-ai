@@ -10,12 +10,11 @@ import config
 from schemas import SegmentRequest
 
 
-
 if not config.DEBUG:
     if config.UPLOAD_DIR.exists():
         shutil.rmtree(config.UPLOAD_DIR)
     config.UPLOAD_DIR.mkdir(exist_ok=True)
-    
+
 app = FastAPI(title="Vandalizer")
 app.add_middleware(
     CORSMiddleware,
@@ -33,7 +32,7 @@ def health_check():
 
 
 @app.post("/upload")
-def upload(img: UploadFile= File(...)):
+def upload(img: UploadFile = File(...)):
     job_id = str(uuid.uuid4())  # uuid1 exposes mac address and time, uuid3,5 uses a key value to generate a hash, same input gets same out, uuid4 is random
     job_folder = config.UPLOAD_DIR / job_id
     job_folder.mkdir()
@@ -41,7 +40,7 @@ def upload(img: UploadFile= File(...)):
     save_path = job_folder / config.INPUT_IMG_NAME
     with open(save_path, "wb") as buffer:
         shutil.copyfileobj(img.file, buffer)
-        
+
     return job_id
 
 
@@ -57,10 +56,10 @@ def get_job_status(job_id: str):
 # putting default signature as Form(...) or File(...) makes it a form data, otherwise it would be a query data
 @app.post("/process/detect_objects/{job_id}")
 async def detect_objects(job_id: str, prompt: str = Form(...)):
+    tasks.celery_app.backend.delete(f"celery-task-meta-{job_id}")
     tasks.detect_objects.apply_async(args=[prompt, job_id], task_id=job_id)
     # tasks.detect_objects(prompt=prompt, job_id=job_id)
     return job_id
-
 
 
 @app.post("/process/segment_objects/{job_id}")
