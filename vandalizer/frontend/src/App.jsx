@@ -1,44 +1,27 @@
 import { useState } from "react"
 
-import { Loading } from "./components/Loading"
 import { Header } from "./components/Header"
 import { ImageForm } from "./components/ImageForm"
-import { ErrorMessage } from "./components/ErrorMessage"
 import { ImageDisplay } from "./components/ImageDisplay";
+import { Routes, Route, useNavigate } from "react-router-dom"
 
-
-const AppStates = Object.freeze({
-  IDLE: "IDLE",
-  WAITING_DETECT_PROMPT: "WAITING_DETECT_PROMPT",
-});
 
 function App() {
-  const [appState, setAppState] = useState(AppStates.IDLE);
+  const navigate = useNavigate();
 
-  let [err, setErr] = useState(null);
-  const [loading, setLoading] = useState(false);
-
-  const [jobID, setJobID] = useState(null);
-
-  if (loading)
-    return <Loading />
-
-  const renderContent = () => {
-    if (appState == AppStates.IDLE) {
-      return <ImageForm {...{ loading, setLoading, setErr, setJobID }}
-        onSuccess={res => { setJobID(res.data); setAppState(AppStates.WAITING_DETECT_PROMPT); }
-        } />
-    } else if (appState == AppStates.WAITING_DETECT_PROMPT) {
-      return <ImageDisplay {...{ jobID, setErr }} />
-    }
+  const onImgUpload = (jobID) => {
+    navigate(`/detect/${jobID}`);
   }
 
   return (
     <>
-      {/* Header */}
       <Header />
-      <ErrorMessage err={err} />
-      {renderContent()}
+      <Routes>
+        <Route path="/" element={<ImageForm onSuccess={onImgUpload} />} />
+        <Route path="/detect/:jobID" element={<ImageDisplay />} />
+        {/* <Route path="/segment/:jobID" element={<todo />} /> */}
+        <Route path="*" element={<h1>404 Not Found</h1>} />
+      </Routes>
     </>
   )
 }

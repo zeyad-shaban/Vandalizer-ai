@@ -5,12 +5,17 @@ import { getBBoxes, sendDetectorPrompt } from "../services/api";
 import { Loading } from "../components/Loading"
 import ImageWithBoxes from "../components/ImageWithBoxes"
 import { sleep } from "../utils"
+import { ErrorMessage } from "./ErrorMessage";
+import { useParams } from "react-router-dom";
 
 // todo as of now if i put another prompt and put submit the server just returns the old thing back as it can already find a reference fiel for that there... we need a way to check status of teh thing and such...
-export const ImageDisplay = ({ jobID, setErr }) => {
+export const ImageDisplay = () => {
     const maxServerAttempts = 40;
 
+    const { jobID } = useParams();
     const [loading, setLoading] = useState(false);
+    const [err, setErr] = useState(null);
+
     // contains scores, labels, boxes, text_label, there must be a better way to get intellisense on what it have
     const [boxes, setBoxes] = useState([]); // todo i dont' think having the bboxes here is a good idea, this imagedisplay shoudl be made only to display image not the bboxes nor retreiving them, i think or is this a good practice?
     const [scores, setScores] = useState([]);
@@ -56,6 +61,8 @@ export const ImageDisplay = ({ jobID, setErr }) => {
     // Todo handle errors, loading for image itself
     if (loading)
         return <Loading />
+    if (err)
+        return <ErrorMessage err={err} />
 
     return (
         <>
