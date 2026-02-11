@@ -20,7 +20,7 @@ export const checkJobStatus = (jobID) =>
     apiClient.get(`/job_status/${jobID}`)
 
 
-export const getBBoxes = (jobID) =>
+export const fetchBBoxes = (jobID) =>
     apiClient.get(`/uploads/${jobID}/detector_boxes.json`);
 
 

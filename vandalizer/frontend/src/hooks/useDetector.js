@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { checkJobStatus, getBBoxes, sendDetectorPrompt } from '../services/api';
-import { sleep } from '../utils'
+import { sendDetectorPrompt } from '../services/api';
+import { useGetBBoxes } from './useGetBBoxes';
 
 /**
  * @typedef {Object} DetectorData
@@ -9,31 +9,17 @@ import { sleep } from '../utils'
  * @property {string[]} textLabels
  */
 
-export const useDetector = () => {
-    const maxServerAttempts = 50;
-
+export const useDetector = (jobID) => {
     /** @type {[DetectorData, Function]} */
-    const [data, setData] = useState({ boxes: [], scores: [], textLabels: [] });
+    const { data, getBBoxes } = useGetBBoxes(jobID);
     const [loading, setLoading] = useState(false);
     const [err, setErr] = useState();
 
-    const detect = async (jobID, prompt) => {
+    const detect = async (prompt) => {
         try {
             setLoading(true);
             await sendDetectorPrompt(jobID, prompt);
-
-            // wait till we are done...
-            while (true) {
-                const status = (await checkJobStatus(jobID)).data.status; // PENDING, RUNNING, SUCCESS, ERROR
-                if (status == "SUCCESS") {
-                    const res = await getBBoxes(jobID);
-                    setData(res.data);
-                    break;
-                }
-                else if (status == "FAILURE")
-                    throw new Error("Server error, job failed to execute detections");
-            }
-
+            await getBBoxes();
         } catch (err) {
             console.log(err);
             setErr("Failed to detect objects, check developer console for more details")

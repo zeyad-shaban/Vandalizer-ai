@@ -1,7 +1,7 @@
 // todo annoying how to debug this i have to go through my entire application layer first.. annoying didnt' we intend intially to make it that we can refresh it without losing progress? this "stateless" concept?
 
 import { useState, useRef } from "react";
-import { getBBoxes, sendDetectorPrompt } from "../services/api";
+import { fetchBBoxes, sendDetectorPrompt } from "../services/api";
 import { Loading } from "../components/Loading"
 import ImageWithBoxes from "../components/ImageWithBoxes"
 import { useDetector } from "../hooks/useDetector"
@@ -19,7 +19,7 @@ export const ImageDisplay = () => {
 
     const handleSubmit = async e => {
         e.preventDefault();
-        detect(jobID, prompt);
+        detect(prompt);
     }
 
     const handlePromptChange = e => {
