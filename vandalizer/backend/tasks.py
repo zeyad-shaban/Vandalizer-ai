@@ -30,7 +30,10 @@ def detect_objects(prompt: str, job_id: str) -> dict:
     prompt_list = get_prompt_list(prompt)
 
     job_path = config.UPLOAD_DIR / job_id
-    (job_path / config.DETECTOR_OUT_PATH).unlink()
+    detection_path = job_path / config.DETECTOR_OUT_PATH
+    if detection_path.exists():
+        detection_path.unlink()
+
     img = Image.open(job_path / config.INPUT_IMG_NAME)  # W x H
 
     model = model_manager.get_detector_model(MODELS)
@@ -59,7 +62,7 @@ def detect_objects(prompt: str, job_id: str) -> dict:
     result["boxes"] = result["boxes"].int().tolist()
     result["text_labels"] = [prompt_list[label] for label in result["labels"]]
 
-    with open(job_path / config.DETECTOR_OUT_PATH, "w") as f:
+    with open(detection_path, "w") as f:
         json.dump(result, f, indent=2)
 
     return result

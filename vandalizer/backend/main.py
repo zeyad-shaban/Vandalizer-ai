@@ -58,6 +58,7 @@ def get_job_status(job_id: str):
 @app.post("/process/detect_objects/{job_id}")
 async def detect_objects(job_id: str, prompt: str = Form(...)):
     tasks.detect_objects.apply_async(args=[prompt, job_id], task_id=job_id)
+    # tasks.detect_objects(prompt=prompt, job_id=job_id)
     return job_id
 
 
