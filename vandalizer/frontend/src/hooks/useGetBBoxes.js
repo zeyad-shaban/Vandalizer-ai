@@ -1,16 +1,30 @@
 import { useEffect, useRef, useState } from "react";
 import { checkJobStatus, fetchBBoxes } from "../services/api";
-import {sleep} from "../utils"
+import { sleep } from "../utils"
 
 export const useGetBBoxes = (jobID) => {
     const [data, setData] = useState({ boxes: [], scores: [], textLabels: [] })
     const isComponentAlive = useRef(true);
 
     useEffect(() => {
-        () => {
+        const initFetching = async () => {
+            try {
+                const res = await fetchBBoxes(jobID);
+                setData(res.data);
+            } catch (err) {
+                if (err.response?.status !== 404)
+                    console.error("Can't run intial fetch ", err);
+            }
+        }
+        initFetching();
+    });
+
+
+    useEffect(() => {
+        return () => {
             isComponentAlive.current = false;
         }
-    })
+    }, [])
 
     const getBBoxes = async () => {
         try {
@@ -23,7 +37,7 @@ export const useGetBBoxes = (jobID) => {
                 }
                 else if (status == "FAILURE")
                     throw new Error("Server error, job failed to execute detections");
-                
+
                 await sleep(1000);
             }
         } catch (err) {
