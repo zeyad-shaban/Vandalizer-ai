@@ -1,5 +1,4 @@
-import { useState, useRef } from "react";
-import { fetchBBoxes, sendDetectorPrompt, startSegmenting } from "../services/api";
+import { useState } from "react";
 import { Loading } from "../components/Loading"
 import ImageWithBoxes from "../components/ImageWithBoxes"
 import { useDetector } from "../hooks/useDetector"
@@ -7,6 +6,7 @@ import { ErrorMessage } from "./ErrorMessage";
 import { useParams } from "react-router-dom";
 import { useSegmentor } from "../hooks/useSegmentor";
 
+// todo add threshold slider
 export const ImageDisplay = () => {
     const { jobID } = useParams();
     const { boxes, scores, text_labels: textLabels, detect, loading: detectorLoading, err: detectorErr } = useDetector(jobID);
@@ -25,8 +25,7 @@ export const ImageDisplay = () => {
     }
 
     const handleStartSegmenting = async () => {
-        console.log("nwoe we shoudl segment..")
-
+        segment();
     }
 
     if (detectorLoading || segmentorLoading)
@@ -43,7 +42,7 @@ export const ImageDisplay = () => {
                 <input type="text" name="prompt" value={prompt} onChange={handlePromptChange} />
                 <button type="submit">Submit</button>
             </form>
-
+            
             <button onClick={handleStartSegmenting}>Start Segmenting</button>
         </>
     )

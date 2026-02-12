@@ -3,6 +3,7 @@ import { uploadImage } from "../services/api";
 import { Loading } from "../components/Loading"
 import { ErrorMessage } from "../components/ErrorMessage"
 
+// todo dont' dispaly unless the app is healthy
 export const ImageForm = ({ onSuccess }) => {
     const [loading, setLoading] = useState(false);
     const [err, setErr] = useState(null);

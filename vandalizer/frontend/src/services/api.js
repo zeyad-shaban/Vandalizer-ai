@@ -21,17 +21,17 @@ export const startSegmenting = (jobID, bboxes) => {
     return apiClient.post(endpoint, { bboxes });
 }
 
-export const checkJobStatus = (jobID) =>
+export const checkJobStatus = jobID =>
     apiClient.get(`/job_status/${jobID}`)
 
 
-export const fetchBBoxes = (jobID) =>
-    apiClient.get(`/uploads/${jobID}/detector_boxes.json`);
+export const fetchBBoxes = jobID =>
+    apiClient.get(`/uploads/${jobID}/${import.meta.env.VITE_OUT_BBOXES_PATH}`);
 
-export const fetchSegmentMasks = () => {
-    console.log('todo')
-}
+export const fetchSegmentMasks = jobID =>
+    apiClient.get(`/uploads/${jobID}/${import.meta.env.VITE_OUT_SEGMENT_PATH}`)
 
 
+// just helpers
 export const getInputImgUrl = (jobID) =>
     `${import.meta.env.VITE_API_BASE_URL}/uploads/${jobID}/${import.meta.env.VITE_INPUT_IMG_PATH}`

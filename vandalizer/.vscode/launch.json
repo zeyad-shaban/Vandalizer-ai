@@ -18,12 +18,23 @@
       "url": "http://localhost:5173",
       "webRoot": "${workspaceFolder}/frontend",
       "runtimeExecutable": "C:\\Program Files\\BraveSoftware\\Brave-Browser\\Application\\brave.exe"
+    },
+    {
+      "name": "Direct Celery Debugger (tasks.py)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/backend/tasks.py",
+      "cwd": "${workspaceFolder}/backend",
+      "console": "integratedTerminal",
     }
   ],
   "compounds": [
     {
       "name": "Debug Full Stack",
-      "configurations": ["Debug Backend (main.py)", "Debug Brave + Vite"]
+      "configurations": [
+        "Debug Backend (main.py)",
+        "Debug Brave + Vite"
+      ]
     }
   ]
 }

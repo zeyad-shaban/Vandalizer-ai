@@ -2,6 +2,7 @@ from celery import Celery
 import config
 import torch
 from utils import get_prompt_list, plot_groundingdino_boxes
+import cv2
 
 from PIL import Image
 
@@ -76,7 +77,11 @@ def segment_objects(self, job_id: str, bboxes=None, points=None, point_labels=No
     model = model_manager.get_segmentor_model(MODELS)
     results = model(img, bboxes=bboxes, points=points, labels=point_labels)
 
-    np.save(job_path / config.SEGMENTOR_OUT_PATH, results[0].masks.data)  # type: ignore
+    mask_data = results[0].masks.data.cpu().numpy()  # n_masks x H x W
+    combined_mask = np.any(mask_data, axis=0).astype(np.uint8) * 255
+    save_path = job_path / config.SEGMENTOR_OUT_PATH
+
+    Image.fromarray(combined_mask).save(save_path)
 
     if self.request.id is None:
         return results[0]

@@ -2,6 +2,8 @@ import { useState } from "react";
 import { getInputImgUrl } from "../services/api"
 
 
+// todo dispaly score and textlabels
+// todo make it render basd on the threshold
 export default function ImageWithBoxes({ jobID, boxes = [], scores = [], textLabels = [], normalized = false }) {
   const [dims, setDims] = useState({ dw: 1, dh: 1, nw: 1, nh: 1 });
 
