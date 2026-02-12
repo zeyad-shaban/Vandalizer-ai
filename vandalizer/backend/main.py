@@ -64,6 +64,7 @@ async def detect_objects(job_id: str, prompt: str = Form(...)):
 
 @app.post("/process/segment_objects/{job_id}")
 async def segment_objects(job_id: str, data: SegmentRequest):
+    tasks.celery_app.backend.delete(f"celery-task-meta-{job_id}")
     tasks.segment_objects.apply_async(args=[job_id, data.bboxes], task_id=job_id)
     return job_id
 

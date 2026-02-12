@@ -22,10 +22,8 @@ export const useGetServerResult = (jobID, fetchingFunc, initValues) => {
 
     useEffect(() => {
         isComponentAlive.current = true; // it's werid that i had to do this..?
-        console.log("set it to true")
         return () => {
             isComponentAlive.current = false;
-            console.log("st it to false")
         }
     }, [])
 

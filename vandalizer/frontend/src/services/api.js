@@ -35,3 +35,6 @@ export const fetchSegmentMasks = jobID =>
 // just helpers
 export const getInputImgUrl = (jobID) =>
     `${import.meta.env.VITE_API_BASE_URL}/uploads/${jobID}/${import.meta.env.VITE_INPUT_IMG_PATH}`
+
+export const getSegmentImgUrl = (jobID) =>
+    `${import.meta.env.VITE_API_BASE_URL}/uploads/${jobID}/${import.meta.env.VITE_OUT_SEGMENT_PATH}`

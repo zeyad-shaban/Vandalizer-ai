@@ -13,7 +13,6 @@ export const useSegmentor = (jobID, boxes) => {
             setLoading(true);
             await startSegmenting(jobID, boxes);
             await getResult();
-            console.log(data);
         } catch (e) {
             console.error("Error Starting Segmentation", e)
             setErr(e);

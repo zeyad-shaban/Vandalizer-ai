@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Loading } from "../components/Loading"
-import ImageWithBoxes from "../components/ImageWithBoxes"
+import Workspace from "./Workspace"
 import { useDetector } from "../hooks/useDetector"
 import { ErrorMessage } from "./ErrorMessage";
 import { useParams } from "react-router-dom";
@@ -35,7 +35,7 @@ export const ImageDisplay = () => {
 
     return (
         <>
-            <ImageWithBoxes {...{ jobID, boxes, scores, textLabels }} />
+            <Workspace {...{ jobID, boxes, scores, textLabels }} />
 
             <form onSubmit={handleSubmit}>
                 <label htmlFor="prompt">Prompt  </label>
