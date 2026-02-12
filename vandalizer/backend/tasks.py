@@ -1,11 +1,9 @@
 from celery import Celery
 import config
 import torch
-from utils import get_prompt_list, plot_groundingdino_boxes
-import cv2
-
+from utils import get_prompt_list, plot_groundingdino_boxes, save_visual_mask
 from PIL import Image
-
+import colorsys
 from transformers import BatchFeature
 import numpy as np
 import json
@@ -78,10 +76,13 @@ def segment_objects(self, job_id: str, bboxes=None, points=None, point_labels=No
     results = model(img, bboxes=bboxes, points=points, labels=point_labels)
 
     mask_data = results[0].masks.data.cpu().numpy()  # n_masks x H x W
-    combined_mask = np.any(mask_data, axis=0).astype(np.uint8) * 255
-    save_path = job_path / config.SEGMENTOR_OUT_PATH
 
-    Image.fromarray(combined_mask).save(save_path)
+    combined_mask = np.any(mask_data, axis=0).astype(np.uint8) * 255
+    save_bin_path = job_path / config.SEGMENTOR_OUT_BIN_PATH
+    save_visual_path = job_path / config.SEGMENTOR_OUT_VISUAL_PATH
+
+    Image.fromarray(combined_mask).save(save_bin_path)
+    save_visual_mask(mask_data, save_visual_path)
 
     if self.request.id is None:
         return results[0]

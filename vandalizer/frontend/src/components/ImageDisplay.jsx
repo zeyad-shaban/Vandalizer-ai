@@ -1,3 +1,5 @@
+import { BoxesOverlay } from "./BoxesOverlay"
+import { MaskOverlay } from "./MaskOverlay"
 import { useState } from "react";
 import { Loading } from "../components/Loading"
 import Workspace from "./Workspace"
@@ -9,11 +11,16 @@ import { useSegmentor } from "../hooks/useSegmentor";
 // todo add threshold slider
 export const ImageDisplay = () => {
     const { jobID } = useParams();
+    const [dims, setDims] = useState({ dw: 1, dh: 1, nw: 1, nh: 1 });
     const { boxes, scores, text_labels: textLabels, detect, loading: detectorLoading, err: detectorErr } = useDetector(jobID);
     const { mask, segment, loading: segmentorLoading, err: segmentorErr } = useSegmentor(jobID, boxes);
 
     const [prompt, setPrompt] = useState("");
     const [thresh, setThresh] = useState(0.1);
+
+    const onDimsChange = (newData) => {
+        setDims(newData);
+    }
 
     const handleSubmit = async e => {
         e.preventDefault();
@@ -35,14 +42,17 @@ export const ImageDisplay = () => {
 
     return (
         <>
-            <Workspace {...{ jobID, boxes, scores, textLabels }} />
+            <Workspace {...{ jobID, onDimsChange }}>
+                <BoxesOverlay jobID={jobID} {...{ boxes, scores, textLabels, normalized: false, dims }} />
+                <MaskOverlay jobID={jobID} show={true} />
+            </Workspace>
 
             <form onSubmit={handleSubmit}>
                 <label htmlFor="prompt">Prompt  </label>
                 <input type="text" name="prompt" value={prompt} onChange={handlePromptChange} />
                 <button type="submit">Submit</button>
             </form>
-            
+
             <button onClick={handleStartSegmenting}>Start Segmenting</button>
         </>
     )

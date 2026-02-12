@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import colorsys
 import matplotlib.patches as patches
 import numpy as np
 from PIL import Image
@@ -40,3 +41,31 @@ def plot_groundingdino_boxes(img: Image.Image, result, figsize=(12, 8), show_sco
 
     plt.axis("off")
     plt.show()
+
+
+def save_visual_mask(mask_data, out_path):
+    masks = (mask_data > 0.5) if mask_data.dtype != bool else mask_data.astype(bool)
+
+    n_masks, H, W = masks.shape
+    out = np.zeros((H, W, 4), dtype=np.uint8)
+    alpha_val = int(0.7 * 255)
+
+    # generate distinct colors via HSV
+    for i in range(n_masks):
+        h = (i / n_masks) % 1.0
+        r, g, b = colorsys.hsv_to_rgb(h, 0.65, 0.95)
+        r, g, b = int(r * 255), int(g * 255), int(b * 255)
+
+        m = masks[i]
+        if m.dtype != bool:
+            m = m.astype(bool)
+
+        # apply color and alpha (later masks overwrite earlier ones)
+        out[m, 0] = r
+        out[m, 1] = g
+        out[m, 2] = b
+        out[m, 3] = alpha_val
+
+    # optional: ensure background alpha = 0 (already zero by initialization)
+    img = Image.fromarray(out, mode="RGBA")
+    img.save(out_path)
