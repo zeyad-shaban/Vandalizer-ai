@@ -16,12 +16,21 @@ export const sendDetectorPrompt = (jobID, prompt) => {
     return apiClient.post(endpoint, data);
 }
 
+export const startSegmenting = (jobID, bboxes) => {
+    const endpoint = `/process/segment_objects/${jobID}`;
+    return apiClient.post(endpoint, { bboxes });
+}
+
 export const checkJobStatus = (jobID) =>
     apiClient.get(`/job_status/${jobID}`)
 
 
 export const fetchBBoxes = (jobID) =>
     apiClient.get(`/uploads/${jobID}/detector_boxes.json`);
+
+export const fetchSegmentMasks = () => {
+    console.log('todo')
+}
 
 
 export const getInputImgUrl = (jobID) =>

@@ -2,8 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { checkJobStatus, fetchBBoxes } from "../services/api";
 import { sleep } from "../utils"
 
-export const useGetBBoxes = (jobID) => {
-    const [data, setData] = useState({ boxes: [], scores: [], textLabels: [] })
+export const useGetServerResult = (jobID, fetchingFunc, initValues) => {
+    const [data, setData] = useState(initValues)
     const isComponentAlive = useRef(true);
 
     useEffect(() => {
@@ -17,26 +17,30 @@ export const useGetBBoxes = (jobID) => {
             }
         }
         initFetching();
-    });
+    }, [jobID]);
 
 
     useEffect(() => {
+        isComponentAlive.current = true; // it's werid that i had to do this..?
+        console.log("set it to true")
         return () => {
             isComponentAlive.current = false;
+            console.log("st it to false")
         }
     }, [])
 
-    const getBBoxes = async () => {
+    const getResult = async () => {
         try {
             while (isComponentAlive.current) {
                 const status = (await checkJobStatus(jobID)).data.status; // PENDING, RUNNING, SUCCESS, ERROR
                 if (status == "SUCCESS" && isComponentAlive.current) {
-                    const res = await fetchBBoxes(jobID);
+                    const res = await fetchingFunc(jobID);
                     setData(res.data);
                     return true;
                 }
-                else if (status == "FAILURE")
+                else if (status == "FAILURE") {
                     throw new Error("Server error, job failed to execute detections");
+                }
 
                 await sleep(1000);
             }
@@ -46,5 +50,5 @@ export const useGetBBoxes = (jobID) => {
         }
     }
 
-    return { data, getBBoxes };
+    return { data, getResult };
 }

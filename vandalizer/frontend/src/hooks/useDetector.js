@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { sendDetectorPrompt } from '../services/api';
-import { useGetBBoxes } from './useGetBBoxes';
+import { fetchBBoxes, sendDetectorPrompt } from '../services/api';
+import { useGetServerResult } from './useGetServerResult';
 
 /**
  * @typedef {Object} DetectorData
@@ -10,10 +10,10 @@ import { useGetBBoxes } from './useGetBBoxes';
  */
 
 export const useDetector = (jobID) => {
-    /** @type {[DetectorData, Function]} */
-    const { data, getBBoxes } = useGetBBoxes(jobID);
     const [loading, setLoading] = useState(false);
-    const [err, setErr] = useState();
+    const [err, setErr] = useState(null);
+    /** @type {[DetectorData, Function]} */
+    const { data, getResult: getBBoxes } = useGetServerResult(jobID, fetchBBoxes, { boxes: [], scores: [], textLabels: [] });
 
     const detect = async (prompt) => {
         try {
@@ -28,5 +28,5 @@ export const useDetector = (jobID) => {
         }
     }
 
-    return { ...data, loading, err, detect }
+    return { ...data, detect, loading, err }
 }

@@ -1,5 +1,3 @@
-import { useState } from "react"
-
 import { Header } from "./components/Header"
 import { ImageForm } from "./components/ImageForm"
 import { ImageDisplay } from "./components/ImageDisplay";
