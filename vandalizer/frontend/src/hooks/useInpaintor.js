@@ -1,0 +1,3 @@
+const useInpaintor = (jobID) => {
+    
+}

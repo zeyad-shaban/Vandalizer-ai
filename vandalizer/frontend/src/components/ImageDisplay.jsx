@@ -7,6 +7,7 @@ import { useDetector } from "../hooks/useDetector"
 import { ErrorMessage } from "./ErrorMessage";
 import { useParams } from "react-router-dom";
 import { useSegmentor } from "../hooks/useSegmentor";
+import { useSegmentor } from "../hooks/useInpaintor";
 
 // todo add threshold slider
 export const ImageDisplay = () => {
@@ -14,6 +15,7 @@ export const ImageDisplay = () => {
     const [dims, setDims] = useState({ dw: 1, dh: 1, nw: 1, nh: 1 });
     const { boxes, scores, text_labels: textLabels, detect, loading: detectorLoading, err: detectorErr } = useDetector(jobID);
     const { mask, segment, loading: segmentorLoading, err: segmentorErr } = useSegmentor(jobID, boxes);
+    const { inpaint, inpaintorLoading, inpaintorErr } = useInpaintor(jobID)
 
     const [prompt, setPrompt] = useState("");
     const [thresh, setThresh] = useState(0.1);
@@ -31,14 +33,18 @@ export const ImageDisplay = () => {
         setPrompt(e.target.value);
     }
 
-    const handleStartSegmenting = async () => {
+    const handleStartSegmenting = () => {
         segment();
     }
 
-    if (detectorLoading || segmentorLoading)
+    const startInpainting = () => {
+        inpaint();
+    }
+
+    if (detectorLoading || segmentorLoading || inpaintorLoading)
         return <Loading />
-    if (detectorErr || segmentorErr)
-        return <ErrorMessage err={detectorErr || segmentorErr} />
+    if (detectorErr || segmentorErr || inpaintorErr)
+        return <ErrorMessage err={detectorErr || segmentorErr || inpaintorErr} />
 
     return (
         <>
@@ -54,6 +60,7 @@ export const ImageDisplay = () => {
             </form>
 
             <button onClick={handleStartSegmenting}>Start Segmenting</button>
+            <button onClick={startInpainting}>Start Inpainting</button>
         </>
     )
 }

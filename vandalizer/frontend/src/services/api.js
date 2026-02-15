@@ -21,6 +21,12 @@ export const startSegmenting = (jobID, bboxes) => {
     return apiClient.post(endpoint, { bboxes });
 }
 
+export const startInpainting = (jobID, prompt) => {
+    const endpoint = ``
+    const data = new FormData();
+    apiClient.post(endpoint, data)
+}
+
 export const checkJobStatus = jobID =>
     apiClient.get(`/job_status/${jobID}`)
 

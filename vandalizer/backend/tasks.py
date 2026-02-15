@@ -14,7 +14,7 @@ MODELS: dict[str, Any] = {
     "detector": None,
     "detector_processor": None,
     "segmentor": None,
-    "inpainter": None,
+    "inpaintor": None,
 }
 
 celery_app = Celery(
@@ -88,6 +88,22 @@ def segment_objects(self, job_id: str, bboxes=None, points=None, point_labels=No
         return results[0]
 
     return True
+    
+@celery_app.task(bind=True)
+def inpaint(self, job_id: str, prompt: str):
+    # load image and segmentations
+    # mask_img = Image.fromarray((masks[0].numpy() * 255).astype(np.uint8))
+    prompt = "vampire face"
+    
+    result = diffuser_model(
+        prompt=prompt,
+        image=orig_img,
+        mask_image=mask_img,
+        strength=0.75,         # 1.0 = full replacement, 0.0 = no change
+        guidance_scale=7.5,    # How strictly to follow the text prompt
+        num_inference_steps=20 # Lower for speed, higher for quality
+    )
+    
 
 
 if __name__ == "__main__":

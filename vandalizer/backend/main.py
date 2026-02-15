@@ -69,5 +69,11 @@ async def segment_objects(job_id: str, data: SegmentRequest):
     return job_id
 
 
+@app.post("/process/inpaint/{job_id}")
+async def inapint(job_id, prompt: str):
+    tasks.celery_app.backend.delete(f"celery-task-meta-{job_id}")
+    tasks.inpaint.apply_async(args=[job_id, prompt], task_id=job_id)
+
+
 if __name__ == "__main__":
     uvicorn.run("main:app", host="127.0.0.1", port=8080, reload=True, reload_delay=1)
