@@ -4,9 +4,9 @@ from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 import uuid
 import shutil
-import tasks
+import tasks as tasks
 from celery.result import AsyncResult
-import config
+import config as config
 from schemas import SegmentRequest
 
 
@@ -57,7 +57,7 @@ def get_job_status(job_id: str):
 @app.post("/process/detect_objects/{job_id}")
 async def detect_objects(job_id: str, prompt: str = Form(...)):
     tasks.celery_app.backend.delete(f"celery-task-meta-{job_id}")
-    tasks.detect_objects.apply_async(args=[prompt, job_id], task_id=job_id)
+    tasks.detect_objects.apply_async(args=[job_id, prompt], task_id=job_id)
     # tasks.detect_objects(prompt=prompt, job_id=job_id)
     return job_id
 
@@ -70,7 +70,7 @@ async def segment_objects(job_id: str, data: SegmentRequest):
 
 
 @app.post("/process/inpaint/{job_id}")
-async def inapint(job_id, prompt: str):
+async def inapint(job_id, prompt: str = Form(...)):
     tasks.celery_app.backend.delete(f"celery-task-meta-{job_id}")
     tasks.inpaint.apply_async(args=[job_id, prompt], task_id=job_id)
 

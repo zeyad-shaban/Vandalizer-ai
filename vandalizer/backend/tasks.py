@@ -1,7 +1,8 @@
+# %%
 from celery import Celery
-import config
+import config as config
 import torch
-from utils import get_prompt_list, plot_groundingdino_boxes, save_visual_mask
+from utils import get_prompt_list, plot_groundingdino_boxes, save_visual_mask, blur_img_with_mask
 from PIL import Image
 import colorsys
 from transformers import BatchFeature
@@ -19,13 +20,13 @@ MODELS: dict[str, Any] = {
 
 celery_app = Celery(
     "worker",
-    broker="redis://172.25.87.204:6379/0",
-    backend="redis://172.25.87.204:6379/1",
+    broker="redis://172.29.184.20:6379/0",
+    backend="redis://172.29.184.20:6379/1",
 )
 
 
 @celery_app.task
-def detect_objects(prompt: str, job_id: str) -> dict:
+def detect_objects(job_id: str, prompt: str) -> dict:
     prompt_list = get_prompt_list(prompt)
 
     job_path = config.UPLOAD_DIR / job_id
@@ -88,36 +89,60 @@ def segment_objects(self, job_id: str, bboxes=None, points=None, point_labels=No
         return results[0]
 
     return True
-    
+
+
 @celery_app.task(bind=True)
-def inpaint(self, job_id: str, prompt: str):
-    # load image and segmentations
-    # mask_img = Image.fromarray((masks[0].numpy() * 255).astype(np.uint8))
-    prompt = "vampire face"
-    
-    result = diffuser_model(
-        prompt=prompt,
-        image=orig_img,
-        mask_image=mask_img,
-        strength=0.75,         # 1.0 = full replacement, 0.0 = no change
-        guidance_scale=7.5,    # How strictly to follow the text prompt
-        num_inference_steps=20 # Lower for speed, higher for quality
-    )
-    
+def inpaint(self, job_id: str, prompt: str, negative_prompt: str, num_inference_steps: int, guidance_scale: float) -> bool:
+    job_path = config.UPLOAD_DIR / job_id
+    orig_img = Image.open(job_path / config.INPUT_IMG_NAME).convert("RGB")
+    mask_img = Image.open(job_path / config.SEGMENTOR_OUT_BIN_PATH).convert("L")
+
+    mode = "blur"
+
+    if mode == "inpaint":
+        model = model_manager.get_inpaintor_model(MODELS)
+        inpainted_img = model(
+            prompt=prompt,
+            negative_prompt=negative_prompt,
+            image=orig_img,
+            mask_image=mask_img,
+            num_inference_steps=6,
+            guidance_scale=0.0,
+        ).images[0]
+
+    elif mode == "remove":
+        model = model_manager.get_removing_model(MODELS)
+
+    elif mode == "blur":
+        result = blur_img_with_mask(orig_img, mask_img)
+        result.save(job_path / config.INPAINTOR_OUT_PATH)
+        
+    if self.request.id is None:
+        return result
+        
+    return True
 
 
+# %%
 if __name__ == "__main__":
     import matplotlib.pyplot as plt
 
-    prompt = "hat"
-    img = Image.open(config.UPLOAD_DIR / config.DEBUG_JOB_ID / config.INPUT_IMG_NAME)
+    # prompt = "hat"
+    # img = Image.open(config.UPLOAD_DIR / config.DEBUG_JOB_ID / config.INPUT_IMG_NAME)
 
-    detection_res = detect_objects(prompt=prompt, job_id=config.DEBUG_JOB_ID)
-    plot_groundingdino_boxes(img, detection_res)
+    # %%
+    # detection_res = detect_objects(job_id=config.DEBUG_JOB_ID, prompt=prompt)
+    # plot_groundingdino_boxes(img, detection_res)
 
-    segment_res = segment_objects.run(job_id=config.DEBUG_JOB_ID, bboxes=detection_res["boxes"])
+    # %%
+    # segment_res = segment_objects.run(job_id=config.DEBUG_JOB_ID, bboxes=detection_res["boxes"])
 
+    # %%
+    inpainted_res = inpaint(job_id=config.DEBUG_JOB_ID, prompt="red hat high quality", negative_prompt="blurry, messy, bad looking", num_inference_steps=4, guidance_scale=0)
+
+    # %%
     img = segment_res.plot()
+    plt.subplot(121)
     plt.imshow(img[:, :, ::-1])
     plt.axis("off")
     plt.show()

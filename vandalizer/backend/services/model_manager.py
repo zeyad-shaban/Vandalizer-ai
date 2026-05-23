@@ -1,8 +1,8 @@
 from transformers import AutoProcessor
 from ultralytics import SAM
 import openvino as ov
-import config
-from optimum.intel import OVStableDiffusionInpaintPipeline
+import config as config
+from optimum.intel import OVStableDiffusionXLInpaintPipeline
 
 
 def get_detector_model(MODELS: dict):
@@ -28,6 +28,17 @@ def get_segmentor_model(MODELS: dict):
 
 
 def get_inpaintor_model(MODELS: dict):
-    if MODELS["inpaintor"] is None:
-        MODELS["inpaintor"] = OVStableDiffusionInpaintPipeline.from_pretrained("../checkpoints/sd15_inpaint_openvino")
-    return MODELS["inpaintor"]
+    if MODELS['inpaintor'] is None:
+        MODELS['inpaintor'] = OVStableDiffusionXLInpaintPipeline.from_pretrained(
+            config.INPAINTOR_MODEL_NAME,
+            device="CPU" # or "GPU"
+        )
+    return MODELS['inpaintor']
+    
+def get_removing_model(MODELS: dict):
+    if MODELS['obj_remove'] is None:
+        MODELS['obj_remove'] = OVStableDiffusionXLInpaintPipeline.from_pretrained(
+            config.INPAINTOR_MODEL_NAME,
+            device="CPU" # or "GPU"
+        )
+    return MODELS['obj_remove']

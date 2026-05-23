@@ -7,7 +7,7 @@ import { useDetector } from "../hooks/useDetector"
 import { ErrorMessage } from "./ErrorMessage";
 import { useParams } from "react-router-dom";
 import { useSegmentor } from "../hooks/useSegmentor";
-import { useSegmentor } from "../hooks/useInpaintor";
+import { useInpaintor } from '../hooks/useInpaintor'
 
 // todo add threshold slider
 export const ImageDisplay = () => {

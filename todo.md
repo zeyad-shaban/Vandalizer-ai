@@ -24,3 +24,8 @@ implement a SAM from scratch
 
 
 
+# Optimiziation todo list
+
+Tiled VAE (The "Silver Bullet") # How
+INT8 Weight Compression (NNCF)  # perhaps test on mnist dataset first and see how to calibrate and such
+Use openvino_genai instead

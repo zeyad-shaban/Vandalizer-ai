@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import colorsys
 import matplotlib.patches as patches
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageFilter
 
 
 def get_prompt_list(prompt: str):
@@ -69,3 +69,23 @@ def save_visual_mask(mask_data, out_path):
     # optional: ensure background alpha = 0 (already zero by initialization)
     img = Image.fromarray(out, mode="RGBA")
     img.save(out_path)
+
+
+def blur_img_with_mask(
+    original_img: Image.Image,
+    mask_img: Image.Image,
+    blur_radius: int = 15,
+) -> Image.Image:
+    original_image = original_img.convert("RGB")
+    mask_image = mask_img.convert("L")
+
+    # Create blurred version of image
+    blurred_image = original_img.filter(ImageFilter.GaussianBlur(radius=blur_radius))
+
+    result = Image.composite(
+        blurred_image,
+        original_image,
+        mask_img,
+    )
+
+    return result

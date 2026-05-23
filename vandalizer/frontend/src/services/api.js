@@ -22,10 +22,14 @@ export const startSegmenting = (jobID, bboxes) => {
 }
 
 export const startInpainting = (jobID, prompt) => {
-    const endpoint = ``
+    const endpoint = `/process/inpaint/${jobID}`;
     const data = new FormData();
-    apiClient.post(endpoint, data)
+    data.append('prompt', prompt);
+    return apiClient.post(endpoint, data);
 }
+
+export const fetchInpaintResult = jobID =>
+    apiClient.get(`/uploads/${jobID}/${import.meta.env.VITE_OUT_INPAINT_PATH}`);
 
 export const checkJobStatus = jobID =>
     apiClient.get(`/job_status/${jobID}`)
